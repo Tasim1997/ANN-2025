@@ -1,3 +1,6 @@
+Model Coefficients are saved in my_model2.h5
+
+
 The Process to work with this code.
 1. First download the dataset. (If ylimit error is not shown, you can use yfinance to have the data set)
 The follwing codes can be used to download date in CSV formate from yfinance

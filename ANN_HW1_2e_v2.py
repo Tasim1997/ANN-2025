@@ -6,18 +6,46 @@ from tensorflow import keras
 from tensorflow.keras import layers, regularizers
 from sklearn.preprocessing import StandardScaler
 
-#################################
-# 1) Load Data from CSV Files
-#################################
-X_train_df = pd.read_csv("x_training.csv", index_col=0)
-y_train_df = pd.read_csv("y_training.csv", index_col=0)
+import yfinance as yf
+import pandas as pd
 
-X_val_df   = pd.read_csv("x_val.csv", index_col=0)
-y_val_df   = pd.read_csv("y_val.csv", index_col=0)
+def get_price(tick, start='2022-10-01', end=None):
+    """
+    Download historical Close prices for a single ticker using yfinance.
+    """
+    return yf.Ticker(tick).history(start=start, end=end)['Close']
 
-X_test_df  = pd.read_csv("x_testing.csv", index_col=0)
-y_test_df  = pd.read_csv("y_testing.csv", index_col=0)
+def get_prices(tickers, start='2022-10-01', end=None):
 
+    df = pd.DataFrame()
+    for s in tickers:
+        df[s] = get_price(s, start, end)
+    return df
+
+# Define your feature tickers and the stock to be predicted
+feature_stocks = ['tsla','meta','goog','amzn','nflx','gbtc','gdx','intc','dal','c']
+predict_stock  = 'msft'
+
+
+
+train_start = '2023-01-01'
+train_end   = '2024-06-30'
+val_start   = '2024-07-01'
+val_end     = '2024-10-31'
+test_start  = '2024-11-01'
+test_end    = '2024-12-31'
+
+# -- Download Data from yfinance --
+X_train_df = get_prices(feature_stocks, start=train_start, end=train_end)
+y_train_df = get_prices([predict_stock],  start=train_start, end=train_end)
+
+X_val_df   = get_prices(feature_stocks, start=val_start, end=val_end)
+y_val_df   = get_prices([predict_stock],  start=val_start, end=val_end)
+
+X_test_df  = get_prices(feature_stocks, start=test_start, end=test_end)
+y_test_df  = get_prices([predict_stock],  start=test_start, end=test_end)
+
+# Print to verify
 print("X_train_df head:")
 print(X_train_df.head())
 print("\ny_train_df head:")
@@ -30,6 +58,7 @@ print("\nX_test_df head:")
 print(X_test_df.head())
 print("\ny_test_df head:")
 print(y_test_df.head())
+
 
 #################################
 # 2) Convert DataFrames to NumPy Arrays
@@ -165,5 +194,5 @@ for i in range(min(5, len(y_true))):
 #################################
 # 11) Save the Model (Coefficients)
 #################################
-model.save("my_model.h5")
+model.save("my_model2.h5")
 print("\nModel saved to 'my_model.h5' with all weights (coefficients).")
